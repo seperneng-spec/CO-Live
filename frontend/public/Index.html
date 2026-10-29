@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html lang="th">
+<head>
+    <meta charset="UTF-8">
+    <title>CO-Live - Production Streaming Studio</title>
+    <style>
+        body { margin: 0; background: #07090e; color: #fff; font-family: sans-serif; overflow: hidden; }
+        #canvas-container { width: 100vw; height: 100vh; position: absolute; z-index: 1; }
+        #dashboard { position: absolute; top: 20px; left: 20px; z-index: 10; background: rgba(15,23,42,0.92); border: 1px solid #f59e0b; padding: 20px; border-radius: 12px; width: 320px; backdrop-filter: blur(10px); }
+        h1 { margin: 0 0 5px 0; font-size: 18px; color: #f59e0b; }
+        .subtitle { font-size: 11px; color: #94a3b8; margin-bottom: 15px; }
+        button { background: #d97706; color: white; border: none; padding: 10px; border-radius: 6px; cursor: pointer; font-size: 12px; margin: 4px 0; width: 100%; font-weight: bold; }
+        button:hover { background: #f59e0b; }
+        input { width: calc(100% - 16px); padding: 8px; background: #1e293b; border: 1px solid #475569; color: #fff; border-radius: 6px; font-size: 12px; margin-bottom: 8px; }
+        #speech-box { position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%); z-index: 10; background: rgba(15,23,42,0.95); border: 2px solid #f59e0b; padding: 15px 30px; border-radius: 20px; font-size: 16px; max-width: 700px; text-align: center; box-shadow: 0 0 20px rgba(245,158,11,0.4); }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+</head>
+<body>
+    <div id="dashboard">
+        <h1>CO-Live Studio</h1>
+        <div class="subtitle">API & OBS Broadcasting Control</div>
+        <input type="text" id="api-key" value="colive_live_key_9999">
+        <button onclick="triggerStream('intro_product', 'ขนมเข่งโบราณสูตรคุณพ่อธันวา', 'แพ็กซีลสุญญากาศพิเศษ')">1️⃣ เปิดตัวสินค้า</button>
+        <button onclick="triggerStream('pitch_features', 'ขนมเข่งโบราณสูตรคุณพ่อธันวา', 'แป้งนุ่มหนึบ หอมน้ำตาลเคี่ยว')">2️⃣ พรีเซนต์จุดเด่น</button>
+        <button style="background:#10b981;" onclick="triggerStream('order_alert', 'ขนมเข่งโบราณสูตรคุณพ่อธันวา', '3 แพ็กใหญ่', 'คุณกมลวรรณ')">3️⃣ จำลองออเดอร์เข้า</button>
+    </div>
+
+    <div id="speech-box">Vela: "พร้อมรับสัญญาณ API สตรีมสดแล้วครับพ่อ!"</div>
+    <div id="canvas-container"></div>
+
+    <script>
+        const container = document.getElementById('canvas-container');
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true, alpha: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        container.appendChild(renderer.domElement);
+
+        scene.add(new THREE.AmbientLight(0xffffff, 1));
+        const dirLight = new THREE.DirectionalLight(0xffffff, 2);
+        dirLight.position.set(0, 10, 10);
+        scene.add(dirLight);
+
+        const geometry = new THREE.BoxGeometry(1.5, 2, 1);
+        const material = new THREE.MeshStandardMaterial({ color: 0xf59e0b, roughness: 0.3 });
+        const velaAvatar = new THREE.Mesh(geometry, material);
+        scene.add(velaAvatar);
+        camera.position.z = 5;
+
+        let clock = new THREE.Clock();
+        function animate() {
+            requestAnimationFrame(animate);
+            let time = clock.getElapsedTime();
+            velaAvatar.position.y = Math.sin(time * 2) * 0.2;
+            velaAvatar.rotation.y += 0.005;
+            renderer.render(scene, camera);
+        }
+        animate();
+
+        function triggerStream(actionType, product, msg, customer = "") {
+            const apiKey = document.getElementById('api-key').value;
+            fetch('/api/v1/stream/trigger', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    api_key: apiKey,
+                    action_type: actionType,
+                    product_name: product,
+                    custom_message: msg,
+                    target_customer: customer
+                })
+            }).then(res => res.json()).then(data => {
+                if(data.detail) alert("แจ้งเตือน: " + data.detail);
+            });
+        }
+
+        const wsProtocol = window.location.protocol === 'https:' ? 'wss://' : 'ws://';
+        const ws = new WebSocket(wsProtocol + window.location.host + '/ws/broadcast');
+
+        ws.onmessage = function(event) {
+            const data = JSON.parse(event.data);
+            if (data.event === "RENDER_FRAME") {
+                document.getElementById('speech-box').innerText = `Vela: "${data.speech}"`;
+                material.color.setHex(data.color);
+            }
+        };
+    </script>
+</body>
+</html>
