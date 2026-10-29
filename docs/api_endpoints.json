@@ -1,0 +1,30 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "CO-Live API",
+    "version": "1.0.0",
+    "description": "REST API endpoints for CO-Live backend"
+  },
+  "paths": {
+    "/api/v1/auth/login": {
+      "post": {
+        "summary": "Login or create a user session"
+      }
+    },
+    "/api/v1/stream/start": {
+      "post": {
+        "summary": "Start livestream"
+      }
+    },
+    "/api/v1/stream/stop": {
+      "post": {
+        "summary": "Stop livestream"
+      }
+    },
+    "/api/v1/webhooks/shopify": {
+      "post": {
+        "summary": "Receive Shopify webhook"
+      }
+    }
+  }
+}

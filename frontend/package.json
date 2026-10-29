@@ -1,0 +1,19 @@
+{
+  "name": "co-live-frontend",
+  "version": "1.0.0",
+  "private": true,
+  "scripts": {
+    "start": "react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject"
+  },
+  "dependencies": {
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "react-scripts": "5.0.1",
+    "three": "^0.169.0",
+    "@react-three/fiber": "^8.17.10",
+    "@react-three/drei": "^9.118.0"
+  }
+}

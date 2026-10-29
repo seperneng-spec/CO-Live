@@ -1,0 +1,11 @@
+# CO-Live
+
+This repository contains the initial scaffold for the CO-Live project.
+
+## Included modules
+
+- backend: FastAPI backend, database models, sequencing core, services, and API routes
+- frontend: React dashboard and 3D viewer UI
+- docs: API metadata
+- obs: browser source configuration
+- docker-compose: multi-service orchestration
